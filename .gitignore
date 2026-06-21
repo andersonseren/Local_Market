@@ -1,0 +1,70 @@
+# Entorno virtual
+.venv/
+venv/
+env/
+ENV/
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Base de datos
+*.db
+*.sqlite
+*.sqlite3
+local_market.db
+
+# Logs
+*.log
+logs/
+
+# Archivos generados
+app/static/invoices/
+app/static/reports/
+instance/
+
+# Caché
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Migrations (generadas automáticamente)
+migrations/versions/

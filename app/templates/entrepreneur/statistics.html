@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Estadísticas detalladas</h1>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="dashboard-card card">
+            <div class="card-body">
+                <h5>Total ventas (COP)</h5>
+                <p class="display-6">{{ total_ventas|currency }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="dashboard-card card">
+            <div class="card-body">
+                <h5>Número de pedidos</h5>
+                <p class="display-6">{{ num_pedidos }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">Ventas mensuales</div>
+    <div class="card-body">
+        <canvas id="salesChart" height="250"></canvas>
+    </div>
+</div>
+
+<h2>Productos más vendidos</h2>
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr><th>Producto</th><th>Cantidad vendida</th></tr>
+        </thead>
+        <tbody>
+            {% for product, count in top_products %}
+            <tr><td>{{ product }}</td><td>{{ count }}</td></tr>
+            {% else %}
+            <tr><td colspan="2">No hay datos de ventas aún.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    const salesData = {{ sales_by_month|tojson }};
+    const months = salesData.map(item => item[0]);
+    const totals = salesData.map(item => item[1]);
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: months.map(m => {
+                const date = new Date(2024, m-1, 1);
+                return date.toLocaleString('es', { month: 'short' });
+            }),
+            datasets: [{
+                label: 'Ventas (COP)',
+                data: totals,
+                backgroundColor: '#f75407',
+                borderRadius: 8
+            }]
+        }
+    });
+</script>
+{% endblock %}

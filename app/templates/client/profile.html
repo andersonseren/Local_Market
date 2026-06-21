@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Mi perfil</h1>
+<div class="card mb-4">
+    <div class="card-body">
+        <p><strong>Nombre:</strong> {{ current_user.first_name }} {{ current_user.last_name }}</p>
+        <p><strong>Email:</strong> {{ current_user.email }}</p>
+        <p><strong>Rol:</strong> {{ current_user.role|capitalize }}</p>
+        <p><strong>Total de compras realizadas:</strong> {{ total_compras|currency }}</p>
+    </div>
+</div>
+
+<h2>Historial de pedidos</h2>
+{% if orders %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID Pedido</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.order_date.strftime('%d/%m/%Y') }}</td>
+                <td>{{ order.total|currency }}</td>
+                <td>{{ order.status }}</td>
+                <td>
+                    <a href="{{ url_for('client.order_detail', order_id=order.id) }}" class="btn btn-sm btn-info">Ver</a>
+                    {% if order.invoice and order.invoice.pdf_path %}
+                    <a href="{{ url_for('client.download_invoice', order_id=order.id) }}" class="btn btn-sm btn-success">PDF</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-secondary">No has realizado compras aún.</div>
+{% endif %}
+<a href="{{ url_for('client.catalog') }}" class="btn btn-primary">Seguir comprando</a>
+{% endblock %}

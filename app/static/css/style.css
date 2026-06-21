@@ -1,0 +1,63 @@
+/* ===== PALETA DE COLORES CORPORATIVOS ===== */
+:root {
+    --azul-primary: #122474;
+    --naranja-accent: #f75407;
+    --azul-claro: #1e3a8a;
+    --naranja-claro: #ff7a2f;
+}
+
+/* Navbar con color azul */
+.bg-custom-nav {
+    background-color: var(--azul-primary) !important;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: var(--naranja-accent);
+}
+
+/* Botón principal naranja (opcional) */
+.btn-primary {
+    background-color: var(--azul-primary);
+    border-color: var(--azul-primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--azul-claro);
+}
+
+.btn-accent {
+    background-color: var(--naranja-accent);
+    border-color: var(--naranja-accent);
+    color: white;
+}
+
+.btn-accent:hover {
+    background-color: var(--naranja-claro);
+    color: white;
+}
+
+/* Enlaces */
+a {
+    color: var(--azul-primary);
+}
+
+a:hover {
+    color: var(--naranja-accent);
+}
+
+/* Tablas: cabecera azul */
+.table thead th {
+    background-color: var(--azul-primary);
+    color: white;
+}
+
+/* Footer azul */
+footer {
+    background-color: var(--azul-primary);
+    color: white;
+}
+
+/* Títulos */
+h1, h2, h3 {
+    color: var(--azul-primary);
+}

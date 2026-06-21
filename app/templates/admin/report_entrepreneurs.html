@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Reporte de Emprendedores</h1>
+<div class="mb-3">
+    <a href="{{ url_for('admin.export_report', tipo='emprendedores', formato='csv') }}" class="btn btn-accent">Exportar CSV</a>
+    <a href="{{ url_for('admin.export_report', tipo='emprendedores', formato='pdf') }}" class="btn btn-accent">Exportar PDF</a>
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Nombre completo</th>
+                <th>Fecha registro</th>
+                <th># Productos</th>
+                <th>Total ventas (COP)</th>
+                <th>Producto más vendido</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.email }}</td>
+                <td>{{ row.full_name }}</td>
+                <td>{{ row.created_at.strftime('%d/%m/%Y') }}</td>
+                <td>{{ row.total_products }}</td>
+                <td>{{ row.total_sales|currency }}</td>
+                <td>{{ row.top_product }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

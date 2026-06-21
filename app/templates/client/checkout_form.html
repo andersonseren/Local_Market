@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Confirmar compra</h1>
+<div class="row">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-body">
+                <h5>Detalle del pedido</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr><th>Producto</th><th>Cantidad</th><th>Subtotal</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for item in cart.values() %}
+                            <tr>
+                                <td>{{ item.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ (item.price * item.quantity)|currency }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr><th colspan="2" class="text-end">Total</th><th>{{ total|currency }}</th></tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-body">
+                <h5>Datos de envío y pago</h5>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label>Nombre completo</label>
+                        <input type="text" name="full_name" class="form-control" value="{{ current_user.first_name }} {{ current_user.last_name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Dirección</label>
+                        <input type="text" name="address" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Teléfono</label>
+                        <input type="tel" name="phone" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Método de pago (simulado)</label>
+                        <select name="payment_method" class="form-select">
+                            <option value="tarjeta">Tarjeta de crédito</option>
+                            <option value="efectivo">Efectivo contra entrega</option>
+                            <option value="transferencia">Transferencia bancaria</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-accent w-100">Completar compra</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{% if product %}Editar{% else %}Nuevo{% endif %} producto</h1>
+<form method="POST">
+    <div class="mb-3">
+        <label>Nombre del producto</label>
+        <input type="text" name="name" class="form-control" value="{{ product.name if product else '' }}" required>
+    </div>
+    <div class="mb-3">
+        <label>Descripción</label>
+        <textarea name="description" class="form-control" rows="4">{{ product.description if product else '' }}</textarea>
+    </div>
+    <div class="mb-3">
+        <label>Precio (Pesos Colombianos - COP)</label>
+        <input type="number" step="1" name="price" class="form-control" value="{{ product.price if product else '' }}" required>
+        <small class="text-muted">Ejemplo: 25000 (sin puntos ni comas)</small>
+    </div>
+    <div class="mb-3">
+        <label>Stock (cantidad disponible)</label>
+        <input type="number" name="stock" class="form-control" value="{{ product.stock if product else 0 }}" required>
+    </div>
+    <div class="mb-3">
+        <label>Categoría</label>
+        <select name="category_id" class="form-select">
+            <option value="">Sin categoría</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if product and product.category_id == cat.id %}selected{% endif %}>
+                {{ cat.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label>URL de imagen (opcional)</label>
+        <input type="url" name="image_url" class="form-control" value="{{ product.image_url if product else '' }}" placeholder="https://ejemplo.com/imagen.jpg">
+    </div>
+    <button type="submit" class="btn btn-primary">💾 Guardar producto</button>
+    <a href="{{ url_for('entrepreneur.list_products') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

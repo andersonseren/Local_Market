@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="display-6 fw-bold">Dashboard de Emprendedor</h1>
+    <span class="badge bg-primary rounded-pill p-3"><i class="bi bi-person-badge"></i> {{ current_user.email }}</span>
+</div>
+
+<!-- Alertas de stock bajo -->
+{% if low_stock %}
+<div class="alert alert-warning border-start border-5 border-warning rounded-4 shadow-sm mb-4">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-exclamation-triangle-fill fs-1 me-3"></i>
+        <div>
+            <strong>¡Stock bajo!</strong> Los siguientes productos tienen menos de 5 unidades:
+            <ul class="mb-0 mt-2">
+                {% for p in low_stock %}
+                <li>{{ p.name }} (Stock: {{ p.stock }})</li>
+                {% endfor %}
+            </ul>
+            <a href="{{ url_for('entrepreneur.list_products', low_stock=true) }}" class="btn btn-sm btn-warning mt-2"><i class="bi bi-eye"></i> Revisar</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-4 mb-5">
+    <div class="col-md-6 col-xl-3">
+        <div class="dashboard-card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-secondary mb-1">Total ventas</p>
+                    <h2 class="fw-bold text-primary mb-0">{{ total_ventas|currency }}</h2>
+                </div>
+                <div class="bg-orange-light rounded-circle p-3">
+                    <i class="bi bi-graph-up-arrow fs-2 text-white" style="color: var(--naranja) !important;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="dashboard-card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-secondary mb-1">Pedidos recibidos</p>
+                    <h2 class="fw-bold text-primary mb-0">{{ num_pedidos }}</h2>
+                </div>
+                <div class="bg-info-light rounded-circle p-3">
+                    <i class="bi bi-truck fs-2 text-info"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="dashboard-card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-secondary mb-1">Productos activos</p>
+                    <h2 class="fw-bold text-primary mb-0">{{ products|length }}</h2>
+                </div>
+                <div class="bg-success-light rounded-circle p-3">
+                    <i class="bi bi-box-seam fs-2 text-success"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="dashboard-card p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <p class="text-secondary mb-1">Producto top</p>
+                    <h6 class="fw-bold mb-0">{{ top_products[0][0] if top_products else '—' }}</h6>
+                </div>
+                <div class="bg-warning-light rounded-circle p-3">
+                    <i class="bi bi-star-fill fs-2 text-warning"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-transparent border-0 pt-3">
+                <h5 class="fw-bold"><i class="bi bi-calendar-week"></i> Ventas mensuales (año actual)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="salesChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-transparent border-0 pt-3">
+                <h5 class="fw-bold"><i class="bi bi-trophy"></i> Productos más vendidos</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for product, count in top_products %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ product }}
+                        <span class="badge bg-accent rounded-pill">{{ count }} unid.</span>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-secondary">No hay ventas aún.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    const salesData = {{ sales_by_month|tojson }};
+    const months = salesData.map(item => {
+        const date = new Date(2024, item[0]-1, 1);
+        return date.toLocaleString('es', { month: 'short' });
+    });
+    const totals = salesData.map(item => item[1]);
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Ventas (COP)',
+                data: totals,
+                borderColor: '#f75407',
+                backgroundColor: 'rgba(247, 84, 7, 0.05)',
+                tension: 0.3,
+                fill: true,
+                pointBackgroundColor: '#122474',
+                pointBorderColor: '#fff',
+                pointRadius: 5,
+                pointHoverRadius: 7,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+            }
+        }
+    });
+</script>
+{% endblock %}

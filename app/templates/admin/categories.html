@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Gestión de categorías</h1>
+<a href="{{ url_for('admin.create_category_view') }}" class="btn btn-accent mb-3">Nueva categoría</a>
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr><th>ID</th><th>Nombre</th><th>Descripción</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+            {% for cat in categories %}
+            <tr>
+                <td>{{ cat.id }}</td>
+                <td>{{ cat.name }}</td>
+                <td>{{ cat.description or '-' }}</td>
+                <td>
+                    <a href="{{ url_for('admin.edit_category_view', category_id=cat.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                    <a href="{{ url_for('admin.delete_category_view', category_id=cat.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar categoría? Se eliminará solo si no tiene productos.')">Eliminar</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">No hay categorías.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

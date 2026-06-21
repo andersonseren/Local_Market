@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Métricas globales</h1>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5>💰 Total de ventas acumuladas</h5>
+                <p class="display-6">{{ total_ventas|currency }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5>👥 Usuarios activos</h5>
+                <p class="display-6">{{ usuarios_activos }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

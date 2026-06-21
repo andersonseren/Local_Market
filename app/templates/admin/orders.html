@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Gestión de pedidos</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-2">
+                <label>Estado</label>
+                <select name="status" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="pendiente" {% if current_status == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                    <option value="completado" {% if current_status == 'completado' %}selected{% endif %}>Completado</option>
+                    <option value="cancelado" {% if current_status == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label>Fecha desde</label>
+                <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+            </div>
+            <div class="col-md-2">
+                <label>Fecha hasta</label>
+                <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+            </div>
+            <div class="col-md-3">
+                <label>Email cliente</label>
+                <input type="text" name="customer_email" class="form-control" value="{{ customer_email }}" placeholder="Buscar por email">
+            </div>
+            <div class="col-md-3 align-self-end">
+                <button type="submit" class="btn btn-accent">Filtrar</button>
+                <a href="{{ url_for('admin.orders') }}" class="btn btn-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Cambiar estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.customer.email }}</td>
+                <td>{{ order.order_date.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>{{ order.total|currency }}</td>
+                <td>
+                    {% if order.status == 'pendiente' %}
+                    <span class="badge bg-warning">Pendiente</span>
+                    {% elif order.status == 'completado' %}
+                    <span class="badge bg-success">Completado</span>
+                    {% else %}
+                    <span class="badge bg-danger">Cancelado</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="POST" action="{{ url_for('admin.change_order_status', order_id=order.id) }}">
+                        <select name="status" class="form-select form-select-sm">
+                            <option value="pendiente" {% if order.status == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                            <option value="completado" {% if order.status == 'completado' %}selected{% endif %}>Completado</option>
+                            <option value="cancelado" {% if order.status == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary mt-1">Actualizar</button>
+                    </form>
+                </td>
+                <td>
+                    <a href="{{ url_for('client.order_detail', order_id=order.id) }}" class="btn btn-sm btn-info">Ver</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center">No hay pedidos que coincidan con los filtros. {# Comentario #}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if pagination and pagination.pages > 1 %}
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if pagination.has_prev %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('admin.orders', page=pagination.prev_num, status=current_status, date_from=date_from, date_to=date_to, customer_email=customer_email) }}">Anterior</a></li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+        {% endif %}
+        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+                {% if page_num == pagination.page %}
+                <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                {% else %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('admin.orders', page=page_num, status=current_status, date_from=date_from, date_to=date_to, customer_email=customer_email) }}">{{ page_num }}</a></li>
+                {% endif %}
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+        {% endfor %}
+        {% if pagination.has_next %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('admin.orders', page=pagination.next_num, status=current_status, date_from=date_from, date_to=date_to, customer_email=customer_email) }}">Siguiente</a></li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

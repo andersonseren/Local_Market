@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Panel de Administración</h1>
+
+<!-- Tarjetas de resumen -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="dashboard-card card">
+            <div class="card-body">
+                <h5 class="card-title">Usuarios</h5>
+                <p class="display-6">{{ stats.total_users }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="dashboard-card card">
+            <div class="card-body">
+                <h5 class="card-title">Productos</h5>
+                <p class="display-6">{{ stats.total_products }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="dashboard-card card">
+            <div class="card-body">
+                <h5 class="card-title">Pedidos</h5>
+                <p class="display-6">{{ stats.total_orders }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="dashboard-card card">
+            <div class="card-body">
+                <h5 class="card-title">Ventas totales</h5>
+                <p class="display-6">{{ stats.total_sales|currency }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráfico simple de ventas por mes (usando Chart.js) -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">Ventas mensuales (año actual)</div>
+            <div class="card-body">
+                <canvas id="salesChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Usuarios por rol</div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for role, count in stats.users_by_role.items() %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ role|capitalize }}
+                        <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Productos más vendidos -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Productos más vendidos</div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for name, total_sold in stats.top_products %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ name }}
+                        <span class="badge bg-success rounded-pill">{{ total_sold }} unidades</span>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item">No hay ventas aún.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Actividades recientes</div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for act in activities %}
+                    <li class="list-group-item">
+                        <small class="text-muted">{{ act.date.strftime('%d/%m/%Y %H:%M') }}</small><br>
+                        {{ act.description }}
+                    </li>
+                    {% else %}
+                    <li class="list-group-item">No hay actividades recientes.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    const salesData = {{ stats.sales_by_month|tojson }};
+    const months = salesData.map(item => item[0]);
+    const totals = salesData.map(item => item[1]);
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months.map(m => {
+                const date = new Date(2024, m-1, 1);
+                return date.toLocaleString('es', { month: 'short' });
+            }),
+            datasets: [{
+                label: 'Ventas (COP)',
+                data: totals,
+                borderColor: '#f75407',
+                backgroundColor: 'rgba(247, 84, 7, 0.1)',
+                tension: 0.3,
+                fill: true
+            }]
+        }
+    });
+</script>
+{% endblock %}

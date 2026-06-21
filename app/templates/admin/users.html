@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Gestión de usuarios</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label>Rol</label>
+                <select name="role" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="cliente" {% if role_filter == 'cliente' %}selected{% endif %}>Cliente</option>
+                    <option value="emprendedor" {% if role_filter == 'emprendedor' %}selected{% endif %}>Emprendedor</option>
+                    <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Administrador</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>Estado</label>
+                <select name="active" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="1" {% if active_filter == '1' %}selected{% endif %}>Activo</option>
+                    <option value="0" {% if active_filter == '0' %}selected{% endif %}>Inactivo</option>
+                </select>
+            </div>
+            <div class="col-md-3 align-self-end">
+                <button type="submit" class="btn btn-accent">Filtrar</button>
+                <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Nombre</th>
+                <th>Rol</th>
+                <th>Activo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                <td>
+                    {% if user.role == 'cliente' %}
+                        <span class="badge bg-info">Cliente</span>
+                    {% elif user.role == 'emprendedor' %}
+                        <span class="badge bg-warning">Emprendedor</span>
+                    {% else %}
+                        <span class="badge bg-danger">Administrador</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user.is_active %}
+                        <span class="badge bg-success">Activo</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Inactivo</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-sm btn-warning">✏️ Editar</a>
+                    <a href="{{ url_for('admin.toggle_user', user_id=user.id) }}" class="btn btn-sm btn-primary">
+                        {% if user.is_active %}🔒 Desactivar{% else %}🔓 Activar{% endif %}
+                    </a>
+                    <a href="{{ url_for('admin.delete_user', user_id=user.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar usuario? Se eliminará solo si no tiene pedidos ni productos.')">🗑️ Eliminar</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center">No hay usuarios que coincidan con los filtros. {# Comentario para evitar error #} </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if pagination and pagination.pages > 1 %}
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if pagination.has_prev %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('admin.users', page=pagination.prev_num, role=role_filter, active=active_filter) }}">Anterior</a></li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+        {% endif %}
+        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+                {% if page_num == pagination.page %}
+                <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                {% else %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('admin.users', page=page_num, role=role_filter, active=active_filter) }}">{{ page_num }}</a></li>
+                {% endif %}
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+        {% endfor %}
+        {% if pagination.has_next %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('admin.users', page=pagination.next_num, role=role_filter, active=active_filter) }}">Siguiente</a></li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
