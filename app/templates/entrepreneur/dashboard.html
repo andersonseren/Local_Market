@@ -1,108 +1,90 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="display-6 fw-bold">Dashboard de Emprendedor</h1>
-    <span class="badge bg-primary rounded-pill p-3"><i class="bi bi-person-badge"></i> {{ current_user.email }}</span>
-</div>
+<h1>Dashboard del Emprendedor</h1>
 
 <!-- Alertas de stock bajo -->
 {% if low_stock %}
-<div class="alert alert-warning border-start border-5 border-warning rounded-4 shadow-sm mb-4">
-    <div class="d-flex align-items-center">
-        <i class="bi bi-exclamation-triangle-fill fs-1 me-3"></i>
-        <div>
-            <strong>¡Stock bajo!</strong> Los siguientes productos tienen menos de 5 unidades:
-            <ul class="mb-0 mt-2">
-                {% for p in low_stock %}
-                <li>{{ p.name }} (Stock: {{ p.stock }})</li>
-                {% endfor %}
-            </ul>
-            <a href="{{ url_for('entrepreneur.list_products', low_stock=true) }}" class="btn btn-sm btn-warning mt-2"><i class="bi bi-eye"></i> Revisar</a>
-        </div>
-    </div>
+<div class="alert alert-warning animate__animated animate__fadeIn">
+    <strong>⚠️ Atención:</strong> Los siguientes productos tienen stock bajo:
+    <ul>
+    {% for p in low_stock %}
+        <li>{{ p.name }} - Stock: {{ p.stock }}</li>
+    {% endfor %}
+    </ul>
+    <a href="{{ url_for('entrepreneur.list_products') }}" class="btn btn-sm btn-accent">Revisar productos</a>
 </div>
 {% endif %}
 
-<div class="row g-4 mb-5">
-    <div class="col-md-6 col-xl-3">
-        <div class="dashboard-card p-3 h-100">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <p class="text-secondary mb-1">Total ventas</p>
-                    <h2 class="fw-bold text-primary mb-0">{{ total_ventas|currency }}</h2>
-                </div>
-                <div class="bg-orange-light rounded-circle p-3">
-                    <i class="bi bi-graph-up-arrow fs-2 text-white" style="color: var(--naranja) !important;"></i>
+<!-- Tarjetas clicables -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <a href="{{ url_for('entrepreneur.statistics') }}" class="text-decoration-none">
+            <div class="dashboard-card card text-center h-100 transition-hover">
+                <div class="card-body">
+                    <h5 class="card-title">💰 Total ventas</h5>
+                    <p class="display-6">{{ total_ventas|currency }}</p>
+                    <small class="text-muted">Ver estadísticas →</small>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
-    <div class="col-md-6 col-xl-3">
-        <div class="dashboard-card p-3 h-100">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <p class="text-secondary mb-1">Pedidos recibidos</p>
-                    <h2 class="fw-bold text-primary mb-0">{{ num_pedidos }}</h2>
-                </div>
-                <div class="bg-info-light rounded-circle p-3">
-                    <i class="bi bi-truck fs-2 text-info"></i>
+    <div class="col-md-3 mb-3">
+        <a href="{{ url_for('entrepreneur.orders') }}" class="text-decoration-none">
+            <div class="dashboard-card card text-center h-100 transition-hover">
+                <div class="card-body">
+                    <h5 class="card-title">📦 Pedidos recibidos</h5>
+                    <p class="display-6">{{ num_pedidos }}</p>
+                    <small class="text-muted">Ver pedidos →</small>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
-    <div class="col-md-6 col-xl-3">
-        <div class="dashboard-card p-3 h-100">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <p class="text-secondary mb-1">Productos activos</p>
-                    <h2 class="fw-bold text-primary mb-0">{{ products|length }}</h2>
-                </div>
-                <div class="bg-success-light rounded-circle p-3">
-                    <i class="bi bi-box-seam fs-2 text-success"></i>
+    <div class="col-md-3 mb-3">
+        <a href="{{ url_for('entrepreneur.list_products') }}" class="text-decoration-none">
+            <div class="dashboard-card card text-center h-100 transition-hover">
+                <div class="card-body">
+                    <h5 class="card-title">📦 Productos activos</h5>
+                    <p class="display-6">{{ products|length }}</p>
+                    <small class="text-muted">Gestionar productos →</small>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
-    <div class="col-md-6 col-xl-3">
-        <div class="dashboard-card p-3 h-100">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <p class="text-secondary mb-1">Producto top</p>
-                    <h6 class="fw-bold mb-0">{{ top_products[0][0] if top_products else '—' }}</h6>
-                </div>
-                <div class="bg-warning-light rounded-circle p-3">
-                    <i class="bi bi-star-fill fs-2 text-warning"></i>
+    <div class="col-md-3 mb-3">
+        <a href="{{ url_for('entrepreneur.profile') }}" class="text-decoration-none">
+            <div class="dashboard-card card text-center h-100 transition-hover">
+                <div class="card-body">
+                    <h5 class="card-title">👤 Mi perfil</h5>
+                    <p class="display-6"><i class="bi bi-person-circle" style="font-size:2rem;"></i></p>
+                    <small class="text-muted">Editar perfil →</small>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
-<div class="row g-4">
-    <div class="col-lg-7">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-header bg-transparent border-0 pt-3">
-                <h5 class="fw-bold"><i class="bi bi-calendar-week"></i> Ventas mensuales (año actual)</h5>
-            </div>
+<!-- Gráfico y productos más vendidos -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">📈 Ventas mensuales</div>
             <div class="card-body">
                 <canvas id="salesChart" height="250"></canvas>
             </div>
         </div>
     </div>
-    <div class="col-lg-5">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-header bg-transparent border-0 pt-3">
-                <h5 class="fw-bold"><i class="bi bi-trophy"></i> Productos más vendidos</h5>
-            </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">🏆 Productos más vendidos</div>
             <div class="card-body">
-                <ul class="list-group list-group-flush">
+                <ul class="list-group">
                     {% for product, count in top_products %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         {{ product }}
-                        <span class="badge bg-accent rounded-pill">{{ count }} unid.</span>
+                        <span class="badge bg-primary rounded-pill">{{ count }} unidades</span>
                     </li>
                     {% else %}
-                    <li class="list-group-item text-secondary">No hay ventas aún.</li>
+                    <li class="list-group-item">No hay ventas aún.</li>
                     {% endfor %}
                 </ul>
             </div>
@@ -110,37 +92,26 @@
     </div>
 </div>
 
+<!-- Script Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const ctx = document.getElementById('salesChart').getContext('2d');
     const salesData = {{ sales_by_month|tojson }};
-    const months = salesData.map(item => {
-        const date = new Date(2024, item[0]-1, 1);
-        return date.toLocaleString('es', { month: 'short' });
-    });
-    const totals = salesData.map(item => item[1]);
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: months,
+            labels: salesData.map(item => {
+                const date = new Date(2024, item[0]-1, 1);
+                return date.toLocaleString('es', { month: 'short' });
+            }),
             datasets: [{
                 label: 'Ventas (COP)',
-                data: totals,
+                data: salesData.map(item => item[1]),
                 borderColor: '#f75407',
-                backgroundColor: 'rgba(247, 84, 7, 0.05)',
+                backgroundColor: 'rgba(247,84,7,0.1)',
                 tension: 0.3,
-                fill: true,
-                pointBackgroundColor: '#122474',
-                pointBorderColor: '#fff',
-                pointRadius: 5,
-                pointHoverRadius: 7,
+                fill: true
             }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'top' },
-            }
         }
     });
 </script>

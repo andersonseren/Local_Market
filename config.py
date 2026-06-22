@@ -7,10 +7,11 @@ class Config:
     """Configuración base de la aplicación"""
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     
-    # ⚠️ IMPORTANTE: En producción, debe usar PostgreSQL. Si no hay DATABASE_URL, fallará.
+    # ============================================================
+    # BASE DE DATOS
+    # ============================================================
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     if not SQLALCHEMY_DATABASE_URI:
-        # Solo permitir SQLite en desarrollo local (cuando FLASK_ENV=development)
         if os.getenv('FLASK_ENV') == 'development':
             SQLALCHEMY_DATABASE_URI = 'sqlite:///local_market.db'
         else:
@@ -18,10 +19,14 @@ class Config:
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
-    # JWT Configuration
+    # ============================================================
+    # JWT CONFIGURATION
+    # ============================================================
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'jwt-secret-key-change-in-production')
     
-    # Session Configuration
+    # ============================================================
+    # SESSION CONFIGURATION
+    # ============================================================
     PERMANENT_SESSION_LIFETIME = 86400  # 24 horas
     SESSION_COOKIE_SECURE = os.getenv('FLASK_ENV') == 'production'
     SESSION_COOKIE_HTTPONLY = True
@@ -29,8 +34,22 @@ class Config:
     REMEMBER_COOKIE_SECURE = os.getenv('FLASK_ENV') == 'production'
     REMEMBER_COOKIE_HTTPONLY = True
     
-    # Max file upload size (5MB)
-    MAX_CONTENT_LENGTH = 5 * 1024 * 1024
+    # ============================================================
+    # MAIL CONFIGURATION (para recuperación de contraseña)
+    # ============================================================
+    MAIL_SERVER = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = int(os.getenv('MAIL_PORT', 587))
+    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS', 'True') == 'True'
+    MAIL_USE_SSL = os.getenv('MAIL_USE_SSL', 'False') == 'True'
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', MAIL_USERNAME)
+    MAIL_DEBUG = os.getenv('MAIL_DEBUG', 'False') == 'True'
+    
+    # ============================================================
+    # FILE UPLOAD
+    # ============================================================
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB
 
 
 class DevelopmentConfig(Config):

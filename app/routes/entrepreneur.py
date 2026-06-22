@@ -9,15 +9,21 @@ from app.services.entrepreneur_service import (
 from app.extensions import db
 from app.models.product import Product
 from collections import Counter
+from datetime import datetime
+from sqlalchemy import func
 
 entrepreneur_bp = Blueprint('entrepreneur', __name__)
 
+
+# ============================================================
+# DASHBOARD
+# ============================================================
 @entrepreneur_bp.route('/dashboard')
 @login_required
 @role_required('emprendedor')
 def dashboard():
     products = Product.query.filter_by(user_id=current_user.id).all()
-    orders = get_entrepreneur_orders_paginated(current_user.id, page=1, per_page=100)  # para estadísticas
+    orders = get_entrepreneur_orders_paginated(current_user.id, page=1, per_page=100)
     total_ventas = sum(order.total for order in orders.items if order.status == 'completado')
     num_pedidos = orders.total
     product_counter = Counter()
@@ -36,6 +42,10 @@ def dashboard():
                            sales_by_month=sales_by_month,
                            low_stock=low_stock)
 
+
+# ============================================================
+# LISTAR PRODUCTOS
+# ============================================================
 @entrepreneur_bp.route('/productos')
 @login_required
 @role_required('emprendedor')
@@ -54,6 +64,10 @@ def list_products():
                            selected_category=category_id,
                            low_stock=low_stock)
 
+
+# ============================================================
+# CREAR PRODUCTO
+# ============================================================
 @entrepreneur_bp.route('/producto/nuevo', methods=['GET', 'POST'])
 @login_required
 @role_required('emprendedor')
@@ -75,6 +89,10 @@ def create_product_view():
             flash(str(e), 'danger')
     return render_template('entrepreneur/product_form.html', product=None, categories=categories)
 
+
+# ============================================================
+# EDITAR PRODUCTO
+# ============================================================
 @entrepreneur_bp.route('/producto/editar/<int:product_id>', methods=['GET', 'POST'])
 @login_required
 @role_required('emprendedor')
@@ -97,6 +115,10 @@ def edit_product_view(product_id):
             flash(str(e), 'danger')
     return render_template('entrepreneur/product_form.html', product=product, categories=categories)
 
+
+# ============================================================
+# ELIMINAR PRODUCTO
+# ============================================================
 @entrepreneur_bp.route('/producto/eliminar/<int:product_id>')
 @login_required
 @role_required('emprendedor')
@@ -111,6 +133,10 @@ def delete_product_view(product_id):
         flash(str(e), 'danger')
     return redirect(url_for('entrepreneur.list_products'))
 
+
+# ============================================================
+# PEDIDOS RECIBIDOS
+# ============================================================
 @entrepreneur_bp.route('/pedidos')
 @login_required
 @role_required('emprendedor')
@@ -131,6 +157,10 @@ def orders():
                            date_from=date_from,
                            date_to=date_to)
 
+
+# ============================================================
+# PERFIL DEL EMPRENDEDOR
+# ============================================================
 @entrepreneur_bp.route('/perfil', methods=['GET', 'POST'])
 @login_required
 @role_required('emprendedor')
@@ -146,22 +176,67 @@ def profile():
             return redirect(url_for('entrepreneur.profile'))
     return render_template('entrepreneur/profile.html', user=current_user)
 
+
+# ============================================================
+# ESTADÍSTICAS (MEJORADO CON current_date)
+# ============================================================
 @entrepreneur_bp.route('/estadisticas')
 @login_required
 @role_required('emprendedor')
 def statistics():
-    orders = get_entrepreneur_orders_paginated(current_user.id, page=1, per_page=100)
-    total_ventas = sum(order.total for order in orders.items if order.status == 'completado')
-    num_pedidos = orders.total
+    orders_data = get_entrepreneur_orders_paginated(current_user.id, page=1, per_page=1000)
+    orders = orders_data.items
+    
+    # Métricas básicas (convertir Decimal a float)
+    total_ventas = float(sum(order.total for order in orders if order.status == 'completado'))
+    num_pedidos = len([o for o in orders if o.status == 'completado'])
+    ticket_promedio = float(total_ventas / num_pedidos) if num_pedidos > 0 else 0.0
+    
+    # Productos vendidos (contador)
     product_counter = Counter()
-    for order in orders.items:
-        for detail in order.details:
-            if detail.product.user_id == current_user.id:
-                product_counter[detail.product.name] += detail.quantity
-    top_products = product_counter.most_common()
-    sales_by_month = get_entrepreneur_sales_by_month(current_user.id)
+    product_revenue = {}
+    for order in orders:
+        if order.status == 'completado':
+            for detail in order.details:
+                if detail.product.user_id == current_user.id:
+                    product_counter[detail.product.name] += detail.quantity
+                    product_revenue[detail.product.name] = product_revenue.get(detail.product.name, 0.0) + float(detail.subtotal)
+    
+    total_productos_vendidos = sum(product_counter.values())
+    
+    # Productos más vendidos (top 10)
+    top_products = product_counter.most_common(10)
+    
+    # Preparar datos para tabla de productos (todos los productos con ventas)
+    product_table = []
+    for name, qty in product_counter.items():
+        product_table.append({
+            'name': name,
+            'quantity': qty,
+            'revenue': product_revenue.get(name, 0.0)
+        })
+    product_table.sort(key=lambda x: x['quantity'], reverse=True)
+    
+    # Ventas mensuales (convertir Decimal a float)
+    sales_by_month = [(mes, float(monto)) for mes, monto in get_entrepreneur_sales_by_month(current_user.id)]
+    
+    # Calcular crecimiento (comparativa mes actual vs mes anterior)
+    growth = 0.0
+    if len(sales_by_month) >= 2:
+        current_month = sales_by_month[-1][1] if sales_by_month else 0.0
+        previous_month = sales_by_month[-2][1] if len(sales_by_month) >= 2 else 0.0
+        if previous_month > 0:
+            growth = ((current_month - previous_month) / previous_month) * 100
+    
+    current_date = datetime.now()
+    
     return render_template('entrepreneur/statistics.html',
                            total_ventas=total_ventas,
                            num_pedidos=num_pedidos,
+                           ticket_promedio=ticket_promedio,
+                           total_productos_vendidos=total_productos_vendidos,
                            top_products=top_products,
-                           sales_by_month=sales_by_month)
+                           product_table=product_table,
+                           sales_by_month=sales_by_month,
+                           growth=growth,
+                           current_date=current_date)

@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-4 text-center">
-        <!-- Logo adicional -->
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Local Market" style="max-height: 150px; margin-bottom: 1rem;">
-        <h2>Iniciar sesión</h2>
+    <div class="col-md-4">
+        <div class="text-center mb-4">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Local Market" style="max-height: 80px;">
+            <h2 class="mt-3">Iniciar sesión</h2>
+        </div>
+        
         <form method="POST">
             <div class="mb-3">
                 <label>Correo electrónico</label>
@@ -16,7 +18,14 @@
             </div>
             <button type="submit" class="btn btn-primary w-100">Ingresar</button>
         </form>
-        <p class="mt-3 text-center">¿No tienes cuenta? <a href="{{ url_for('auth.register') }}">Regístrate aquí</a></p>
+        
+        <div class="text-center mt-3">
+            <a href="{{ url_for('auth.forgot_password') }}">¿Olvidaste tu contraseña?</a>
+        </div>
+        
+        <div class="text-center mt-2">
+            <p>¿No tienes cuenta? <a href="{{ url_for('auth.register') }}">Regístrate aquí</a></p>
+        </div>
     </div>
 </div>
 {% endblock %}

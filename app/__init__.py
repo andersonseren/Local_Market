@@ -1,31 +1,25 @@
 from flask import Flask, redirect, url_for, render_template
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+from flask_mail import Mail
 from config import get_config
 from app.extensions import db, login_manager
 import os
 
-login_manager.login_view = 'auth.login'
-login_manager.login_message = 'Por favor inicie sesión para acceder a esta página.'
+# Inicializar extensiones a nivel de módulo
+mail = Mail()  # <-- Objeto global
 
 def create_app():
     app = Flask(__name__, static_folder='static', static_url_path='/static')
-    
-    # Cargar configuración según el entorno
     app.config.from_object(get_config())
     
-    # Asegurar que los directorios necesarios existan
-    os.makedirs(os.path.join(app.instance_path, 'invoices'), exist_ok=True)
-    os.makedirs(os.path.join(app.instance_path, 'reports'), exist_ok=True)
-    os.makedirs(app.static_folder, exist_ok=True)
-
+    # Inicializar extensiones
     db.init_app(app)
     login_manager.init_app(app)
     migrate = Migrate(app, db)
-    
-    # Configurar JWT
     jwt = JWTManager(app)
-
+    mail.init_app(app)  # <-- Inicializar Flask-Mail
+    
     # Registrar blueprints
     from app.routes.auth import auth_bp
     from app.routes.client import client_bp
@@ -64,7 +58,6 @@ def create_app():
         from app.models.category import Category
         from app.models.product import Product
         from app.models.user import User
-        from app.models.order import Order
         from app.services.product_service import get_all_products
         
         categories = Category.query.all()
@@ -129,13 +122,14 @@ def create_app():
 
     return app
 
-# Importar modelos y user_loader
+# Importar modelos y user_loader (deben estar después de la definición de create_app)
 from app.models.user import User
 from app.models.product import Product
 from app.models.category import Category
 from app.models.order import Order
 from app.models.order_detail import OrderDetail
 from app.models.invoice import Invoice
+from app.models.password_reset_token import PasswordResetToken
 
 @login_manager.user_loader
 def load_user(user_id):
