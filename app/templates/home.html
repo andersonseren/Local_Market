@@ -1,1015 +1,195 @@
 {% extends "base.html" %}
 
-{% block title %}Local Market - Apoya el comercio local{% endblock %}
-
 {% block content %}
-<!-- ============================================================ -->
-<!-- 1. HERO SECTION - VERSIÓN MEJORADA                           -->
-<!-- ============================================================ -->
-<section class="hero-section d-flex align-items-center" id="hero">
-    <div class="container">
-        <div class="row align-items-center g-5">
-            <div class="col-lg-6 hero-text animate-on-scroll">
-                <span class="badge bg-accent mb-3 px-4 py-2 rounded-pill"></span>
-                <h1 class="display-3 fw-bold hero-title">
-                    Descubre y apoya los mejores <span class="text-accent">emprendimientos</span> de tu ciudad
-                </h1>
-                <p class="lead text-secondary mb-4">
-                    Encuentra productos únicos creados por emprendedores locales. Compra directo, sin intermediarios.
-                </p>
-                <div class="d-flex flex-wrap gap-3">
-                    <a href="{{ url_for('client.catalog') }}" class="btn btn-accent btn-lg px-5 rounded-pill">
-                        <i class="bi bi-grid-3x3-gap-fill"></i> Explorar productos
-                    </a>
-                    {% if not current_user.is_authenticated %}
-                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-secondary btn-lg px-5 rounded-pill">
-                            <i class="bi bi-store"></i> Publicar mi negocio
-                        </a>
-                    {% else %}
-                        <a href="{{ url_for('entrepreneur.dashboard') }}" class="btn btn-outline-secondary btn-lg px-5 rounded-pill">
-                            <i class="bi bi-store"></i> Mi tienda
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="col-lg-6 hero-image animate-on-scroll">
-                <div class="hero-illustration">
-                    <div class="hero-placeholder">
-                        <i class="bi bi-shop fs-1 text-white-50"></i>
-                        <h4 class="text-white mt-3">Local Market</h4>
-                        <p class="text-white-50 small">Apoyando el comercio local</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- ============================================================ -->
-<!-- 2. BUSCADOR INTELIGENTE - VERSIÓN MEJORADA                   -->
-<!-- ============================================================ -->
-<section class="py-5 bg-white" id="search-section">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-10">
-                <div class="search-box-modern animate-on-scroll">
-                    <div class="search-icon-wrapper">
-                        <i class="bi bi-search search-icon"></i>
-                    </div>
-                    <form action="{{ url_for('client.catalog') }}" method="GET" class="search-form">
-                        <input type="text"
-                               name="search"
-                               class="search-input-modern"
-                               placeholder="¿Qué producto o emprendimiento buscas?"
-                               aria-label="Búsqueda"
-                               autocomplete="off">
-                        <button type="submit" class="btn btn-accent search-btn-modern">
-                            <i class="bi bi-search"></i> Buscar
-                        </button>
-                    </form>
-                </div>
-                <div class="search-tips text-center mt-3">
-                    <small class="text-secondary">Ej: <span class="badge bg-light text-dark me-1">electrónica</span> <span class="badge bg-light text-dark me-1">ropa</span> <span class="badge bg-light text-dark">artesanal</span></small>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ============================================================ -->
-<!-- 3. CATEGORÍAS POPULARES CON IMÁGENES                         -->
-<!-- ============================================================ -->
-<section class="py-5" id="categories-section">
-    <div class="container">
-        <div class="text-center mb-5 animate-on-scroll">
-            <span class="badge bg-accent px-4 py-2 rounded-pill"></span>
-            <h2 class="display-5 fw-bold mt-2">Explora por categoría</h2>
-            <p class="text-secondary">Encuentra lo que buscas en las categorías más populares</p>
-        </div>
-
-        <div class="row g-4">
-            {% for category in categories[:6] %}
-            <div class="col-lg-2 col-md-4 col-6 animate-on-scroll" style="transition-delay: {{ loop.index0 * 0.05 }}s;">
-                <a href="{{ url_for('client.catalog', category=category.id) }}" class="category-card-modern text-center">
-                    <div class="category-image" style="background: linear-gradient(135deg, {{ category_colors.get(category.name, '#122474') }}, {{ category_colors.get(category.name, '#122474') }}dd);">
-                        <span class="category-emoji">{{ category_emoji.get(category.name, '📦') }}</span>
-                    </div>
-                    <h6 class="mt-3 mb-0 fw-semibold">{{ category.name }}</h6>
-                    <small class="text-secondary">{{ category.products|length }} productos</small>
-                </a>
-            </div>
-            {% else %}
-            <div class="col-12 text-center">
-                <p class="text-secondary">Categorías disponibles próximamente.</p>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-
-<!-- ============================================================ -->
-<!-- 4. PRODUCTOS DESTACADOS                                      -->
-<!-- ============================================================ -->
-<section class="py-5 bg-light" id="featured-products">
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4 animate-on-scroll">
-            <div>
-                <span class="badge bg-accent px-4 py-2 rounded-pill"></span>
-                <h2 class="display-5 fw-bold mt-2">Productos destacados</h2>
-            </div>
-            <a href="{{ url_for('client.catalog') }}" class="btn btn-outline-secondary rounded-pill">
-                Ver todos <i class="bi bi-arrow-right"></i>
+<!-- ===== HERO SECTION ===== -->
+<section class="hero-section text-center py-5" style="background: linear-gradient(135deg, #122474 0%, #1a3a8a 100%); border-radius: 16px; margin-bottom: 2.5rem; box-shadow: 0 8px 30px rgba(18,36,116,0.2);">
+    <div class="container py-4">
+        <h1 class="display-4 fw-bold mb-3" style="color: white !important; letter-spacing: -0.5px; text-shadow: 0 2px 8px rgba(0,0,0,0.15); font-weight: 800;">
+            Descubre y apoya los mejores emprendimientos de tu ciudad
+        </h1>
+        <p class="lead mb-4" style="color: white !important; font-size: 1.3rem; opacity: 0.95; max-width: 700px; margin: 0 auto; font-weight: 500; text-shadow: 0 1px 4px rgba(0,0,0,0.1);">
+            Encuentra productos únicos creados por emprendedores locales. Compra directo, sin intermediarios.
+        </p>
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+            <a href="
+                {%- if current_user.is_authenticated -%}
+                    {{ url_for('client.catalog') }}
+                {%- else -%}
+                    {{ url_for('auth.login') }}
+                {%- endif -%}
+            " class="btn btn-accent btn-lg px-5 rounded-pill fw-semibold" style="background: #f75407; border: none; color: white; box-shadow: 0 4px 15px rgba(247,84,7,0.3); transition: all 0.2s;">
+                <i class="bi bi-search me-2"></i> Explorar productos
+            </a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-lg px-5 rounded-pill fw-semibold" style="border-width: 2px; transition: all 0.2s;">
+                <i class="bi bi-plus-circle me-2"></i> Publicar mi negocio
             </a>
         </div>
-
-        <div class="row g-4">
-            {% for product in featured_products %}
-            <div class="col-lg-3 col-md-6 animate-on-scroll" style="transition-delay: {{ loop.index0 * 0.05 }}s;">
-                <div class="product-card h-100">
-                    <div class="product-image-container">
-                        {% if product.image_url %}
-                        <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image" loading="lazy">
-                        {% else %}
-                        <div class="product-image-placeholder">
-                            <i class="bi bi-image fs-1 text-secondary"></i>
-                        </div>
-                        {% endif %}
-                        <div class="product-actions">
-                            <a href="{{ url_for('client.product_detail', product_id=product.id) }}" class="btn btn-sm btn-accent rounded-pill">Ver detalle</a>
-                            {% if current_user.is_authenticated and current_user.role == 'cliente' %}
-                            <button class="btn btn-sm btn-outline-secondary rounded-pill add-to-cart-btn"
-                                    data-product-id="{{ product.id }}"
-                                    data-product-name="{{ product.name }}">
-                                <i class="bi bi-cart-plus"></i>
-                            </button>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="product-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <h6 class="fw-semibold mb-1">{{ product.name }}</h6>
-                            <span class="fw-bold text-primary">{{ product.price|currency }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-2">
-                            <small class="text-secondary">
-                                <i class="bi bi-tag"></i>
-                                {{ product.category.name if product.category else 'Sin categoría' }}
-                            </small>
-                            <small class="text-secondary">
-                                <i class="bi bi-store"></i>
-                                {{ product.owner.first_name if product.owner else '?' }}
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% else %}
-            <div class="col-12 text-center py-5">
-                <p class="text-secondary">No hay productos destacados aún.</p>
-                <a href="{{ url_for('client.catalog') }}" class="btn btn-accent rounded-pill">Ir al catálogo</a>
-            </div>
-            {% endfor %}
-        </div>
     </div>
 </section>
 
-<!-- ============================================================ -->
-<!-- 5. EMPRENDEDORES DESTACADOS                                  -->
-<!-- ============================================================ -->
-<section class="py-5" id="featured-entrepreneurs">
-    <div class="container">
-        <div class="text-center mb-5 animate-on-scroll">
-            <span class="badge bg-accent px-4 py-2 rounded-pill"></span>
-            <h2 class="display-5 fw-bold mt-2">Emprendedores destacados</h2>
-            <p class="text-secondary">Conoce a los creadores detrás de los mejores productos</p>
-        </div>
-
-        <div class="row g-4">
-            {% for entrepreneur in featured_entrepreneurs %}
-            <div class="col-lg-3 col-md-6 animate-on-scroll" style="transition-delay: {{ loop.index0 * 0.05 }}s;">
-                <div class="entrepreneur-card">
-                    <div class="entrepreneur-avatar">
-                        <i class="bi bi-person-circle fs-1 text-secondary"></i>
+<!-- ===== CATEGORÍAS ===== -->
+<section class="mb-5">
+    <h2 class="text-center mb-4" style="color: #122474; font-weight: 700;">Categorías destacadas</h2>
+    <div class="row g-3">
+        {% for category in categories %}
+        <div class="col-6 col-md-3">
+            <a href="
+                {%- if current_user.is_authenticated -%}
+                    {{ url_for('client.catalog', category=category.id) }}
+                {%- else -%}
+                    {{ url_for('auth.login') }}
+                {%- endif -%}
+            " class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm text-center p-3 transition-hover" style="border-radius: 16px; background: white; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                    <div style="font-size: 2.5rem; line-height: 1.2;">
+                        {{ category_emoji.get(category.name, '📦') }}
                     </div>
-                    <h6 class="fw-bold mt-3 mb-1">{{ entrepreneur.first_name }} {{ entrepreneur.last_name }}</h6>
-                    <p class="text-secondary small mb-1">
-                        <i class="bi bi-shop"></i> {{ entrepreneur.products|length }} productos
-                    </p>
-                    <p class="text-secondary small mb-3">
-                        <i class="bi bi-person"></i> {{ entrepreneur.role }}
-                    </p>
-                    <a href="{{ url_for('client.catalog') }}?user_id={{ entrepreneur.id }}"
-                       class="btn btn-outline-accent btn-sm w-100 rounded-pill">
-                        Ver tienda <i class="bi bi-arrow-right"></i>
-                    </a>
+                    <h5 class="card-title mt-2 mb-0" style="color: #122474; font-weight: 600; font-size: 1rem;">{{ category.name }}</h5>
+                    <small class="text-muted" style="font-size: 0.75rem;">{{ category.products|length }} productos</small>
                 </div>
-            </div>
-            {% else %}
-            <div class="col-12 text-center py-5">
-                <p class="text-secondary">No hay emprendedores registrados aún.</p>
-            </div>
-            {% endfor %}
+            </a>
         </div>
+        {% endfor %}
     </div>
 </section>
 
-<!-- ============================================================ -->
-<!-- 6. BENEFICIOS                                                -->
-<!-- ============================================================ -->
-<section class="py-5 bg-light" id="benefits">
-    <div class="container">
-        <div class="text-center mb-5 animate-on-scroll">
-            <span class="badge bg-accent px-4 py-2 rounded-pill"></span>
-            <h2 class="display-5 fw-bold mt-2">¿Por qué usar Local Market?</h2>
-        </div>
-
-        <div class="row g-4">
-            <div class="col-md-4 animate-on-scroll" style="transition-delay: 0s;">
-                <div class="benefit-card text-center">
-                    <div class="benefit-icon mx-auto">
-                        <i class="bi bi-gift"></i>
-                    </div>
-                    <h5>Productos únicos</h5>
-                    <p class="text-secondary">Encuentra artículos que no encontrarás en grandes superficies, hechos con pasión.</p>
-                </div>
-            </div>
-            <div class="col-md-4 animate-on-scroll" style="transition-delay: 0.1s;">
-                <div class="benefit-card text-center">
-                    <div class="benefit-icon mx-auto">
-                        <i class="bi bi-geo-alt"></i>
-                    </div>
-                    <h5>Compra local</h5>
-                    <p class="text-secondary">Apoya la economía de tu ciudad y reduce la huella de carbono.</p>
-                </div>
-            </div>
-            <div class="col-md-4 animate-on-scroll" style="transition-delay: 0.2s;">
-                <div class="benefit-card text-center">
-                    <div class="benefit-icon mx-auto">
-                        <i class="bi bi-rocket"></i>
-                    </div>
-                    <h5>Empodera emprendedores</h5>
-                    <p class="text-secondary">Ayuda a pequeños negocios a crecer y llegar a nuevos clientes.</p>
-                </div>
-            </div>
-        </div>
+<!-- ===== PRODUCTOS DESTACADOS ===== -->
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 style="color: #122474; font-weight: 700;">Productos destacados</h2>
+        <a href="
+            {%- if current_user.is_authenticated -%}
+                {{ url_for('client.catalog') }}
+            {%- else -%}
+                {{ url_for('auth.login') }}
+            {%- endif -%}
+        " class="btn btn-outline-accent rounded-pill px-4" style="border-color: #f75407; color: #f75407; font-weight: 500; transition: all 0.2s;">
+            Ver todos <i class="bi bi-arrow-right ms-1"></i>
+        </a>
     </div>
-</section>
-
-<!-- ============================================================ -->
-<!-- 7. CÓMO FUNCIONA                                             -->
-<!-- ============================================================ -->
-<section class="py-5" id="how-it-works">
-    <div class="container">
-        <div class="text-center mb-5 animate-on-scroll">
-            <span class="badge bg-accent px-4 py-2 rounded-pill"></span>
-            <h2 class="display-5 fw-bold mt-2">Cómo funciona</h2>
-        </div>
-
-        <div class="row g-4">
-            <div class="col-md-3 animate-on-scroll" style="transition-delay: 0s;">
-                <div class="step-card text-center">
-                    <div class="step-number">1</div>
-                    <div class="step-icon"><i class="bi bi-search"></i></div>
-                    <h6>Explora productos</h6>
-                    <p class="text-secondary small">Navega por el catálogo o usa el buscador para encontrar lo que necesitas.</p>
-                </div>
-            </div>
-            <div class="col-md-3 animate-on-scroll" style="transition-delay: 0.05s;">
-                <div class="step-card text-center">
-                    <div class="step-number">2</div>
-                    <div class="step-icon"><i class="bi bi-person-plus"></i></div>
-                    <h6>Regístrate</h6>
-                    <p class="text-secondary small">Crea tu cuenta como comprador o emprendedor en minutos.</p>
-                </div>
-            </div>
-            <div class="col-md-3 animate-on-scroll" style="transition-delay: 0.1s;">
-                <div class="step-card text-center">
-                    <div class="step-number">3</div>
-                    <div class="step-icon"><i class="bi bi-cart3"></i></div>
-                    <h6>Compra o publica</h6>
-                    <p class="text-secondary small">Adquiere productos o publica los tuyos para vender.</p>
-                </div>
-            </div>
-            <div class="col-md-3 animate-on-scroll" style="transition-delay: 0.15s;">
-                <div class="step-card text-center">
-                    <div class="step-number">4</div>
-                    <div class="step-icon"><i class="bi bi-people"></i></div>
-                    <h6>Conecta local</h6>
-                    <p class="text-secondary small">Forma parte de una comunidad que apoya el comercio local.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ============================================================ -->
-<!-- 8. TESTIMONIOS                                              -->
-<!-- ============================================================ -->
-<section class="py-5 bg-light" id="testimonials">
-    <div class="container">
-        <div class="text-center mb-5 animate-on-scroll">
-            <span class="badge bg-accent px-4 py-2 rounded-pill"></span>
-            <h2 class="display-5 fw-bold mt-2">Lo que dicen nuestros usuarios</h2>
-        </div>
-
-        <div class="row g-4">
-            <div class="col-md-4 animate-on-scroll" style="transition-delay: 0s;">
-                <div class="testimonial-card">
-                    <div class="testimonial-rating">★★★★★</div>
-                    <p class="mt-2">"Local Market me permitió dar a conocer mis productos artesanales a toda la ciudad. ¡Es increíble!"</p>
-                    <div class="d-flex align-items-center mt-3">
-                        <div class="testimonial-avatar"><i class="bi bi-person-circle fs-2"></i></div>
-                        <div class="ms-2">
-                            <h6 class="mb-0 fw-semibold">María García</h6>
-                            <small class="text-secondary">Emprendedora</small>
-                        </div>
+    <div class="row g-3">
+        {% for product in featured_products %}
+        <div class="col-lg-3 col-md-4 col-6">
+            <div class="card h-100 border-0 shadow-sm transition-hover" style="border-radius: 16px; overflow: hidden; background: white; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                <a href="
+                    {%- if current_user.is_authenticated -%}
+                        {{ url_for('client.product_detail', product_id=product.id) }}
+                    {%- else -%}
+                        {{ url_for('auth.login') }}
+                    {%- endif -%}
+                " style="display: block; overflow: hidden;">
+                    {% if product.image_url %}
+                    <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" style="height: 180px; object-fit: cover; transition: transform 0.3s;">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px; color: #adb5bd;">
+                        <i class="bi bi-image fs-1"></i>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-4 animate-on-scroll" style="transition-delay: 0.1s;">
-                <div class="testimonial-card">
-                    <div class="testimonial-rating">★★★★★</div>
-                    <p class="mt-2">"Encontré productos que no había visto en ningún otro lado y además apoyo a emprendedores de mi barrio."</p>
-                    <div class="d-flex align-items-center mt-3">
-                        <div class="testimonial-avatar"><i class="bi bi-person-circle fs-2"></i></div>
-                        <div class="ms-2">
-                            <h6 class="mb-0 fw-semibold">Carlos Pérez</h6>
-                            <small class="text-secondary">Cliente</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 animate-on-scroll" style="transition-delay: 0.2s;">
-                <div class="testimonial-card">
-                    <div class="testimonial-rating">★★★★★</div>
-                    <p class="mt-2">"La plataforma es muy fácil de usar y me ha ayudado a aumentar mis ventas significativamente."</p>
-                    <div class="d-flex align-items-center mt-3">
-                        <div class="testimonial-avatar"><i class="bi bi-person-circle fs-2"></i></div>
-                        <div class="ms-2">
-                            <h6 class="mb-0 fw-semibold">Laura Martínez</h6>
-                            <small class="text-secondary">Emprendedora</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ============================================================ -->
-<!-- 9. CTA – LLAMADO A LA ACCIÓN                                -->
-<!-- ============================================================ -->
-<section class="py-5 cta-section" id="cta">
-    <div class="container">
-        <div class="cta-card text-center animate-on-scroll">
-            <h2 class="display-4 fw-bold text-white">¿Tienes un emprendimiento?</h2>
-            <p class="lead text-white-50 mb-4">
-                Únete a miles de emprendedores que ya están vendiendo en Local Market.
-            </p>
-            {% if not current_user.is_authenticated %}
-                <a href="{{ url_for('auth.register') }}" class="btn btn-accent btn-lg px-5 rounded-pill">
-                    <i class="bi bi-rocket-takeoff"></i> Comienza a vender hoy
+                    {% endif %}
                 </a>
-            {% else %}
-                <a href="{{ url_for('entrepreneur.dashboard') }}" class="btn btn-accent btn-lg px-5 rounded-pill">
-                    <i class="bi bi-store"></i> Ir a mi tienda
-                </a>
-            {% endif %}
-        </div>
-    </div>
-</section>
-
-<!-- ============================================================ -->
-<!-- 10. BOTÓN FLOTANTE VOLVER ARRIBA                            -->
-<!-- ============================================================ -->
-<button id="back-to-top" class="back-to-top" aria-label="Volver arriba">
-    <i class="bi bi-chevron-up"></i>
-</button>
-
-<!-- ============================================================ -->
-<!-- 11. MODAL DE AUTENTICACIÓN                                  -->
-<!-- ============================================================ -->
-<div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content auth-modal">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold">
-                    <i class="bi bi-person-circle text-primary"></i> Inicio de sesión
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p class="text-secondary text-center">
-                    <i class="bi bi-shield-lock fs-3 d-block mb-2"></i>
-                    Para continuar con esta acción, debes iniciar sesión o crear una cuenta.
-                </p>
-                <div class="d-grid gap-3 mt-4">
-                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg rounded-pill">
-                        <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
-                    </a>
-                    <a href="{{ url_for('auth.register') }}" class="btn btn-accent btn-lg rounded-pill">
-                        <i class="bi bi-person-plus"></i> Crear cuenta
+                <div class="card-body d-flex flex-column" style="padding: 1rem;">
+                    <h6 class="card-title text-truncate" style="color: #1e293b; font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem;">{{ product.name }}</h6>
+                    <p class="card-text fw-bold" style="color: #f75407 !important; font-size: 1.1rem; margin-bottom: 0.5rem;">{{ product.price|currency }}</p>
+                    <a href="
+                        {%- if current_user.is_authenticated -%}
+                            {{ url_for('client.product_detail', product_id=product.id) }}
+                        {%- else -%}
+                            {{ url_for('auth.login') }}
+                        {%- endif -%}
+                    " class="btn btn-accent btn-sm w-100 rounded-pill" style="background: #f75407; border: none; color: white; font-weight: 500; transition: all 0.2s; margin-top: auto;">
+                        Ver producto
                     </a>
                 </div>
             </div>
-            <div class="modal-footer border-0 justify-content-center">
-                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- ===== EMPRENDEDORES DESTACADOS ===== -->
+<section class="mb-5">
+    <h2 class="text-center mb-4" style="color: #122474; font-weight: 700;">Emprendedores destacados</h2>
+    <div class="row g-3">
+        {% for entrepreneur in featured_entrepreneurs %}
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm text-center p-3 transition-hover" style="border-radius: 16px; background: white; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                <div style="font-size: 2.8rem; line-height: 1.2; color: #122474;">👤</div>
+                <h6 class="mt-2 mb-0" style="color: #122474; font-weight: 600; font-size: 0.95rem;">{{ entrepreneur.first_name }} {{ entrepreneur.last_name }}</h6>
+                <small class="text-muted" style="font-size: 0.75rem;">Emprendedor</small>
+                <a href="
+                    {%- if current_user.is_authenticated -%}
+                        {{ url_for('client.catalog', user_id=entrepreneur.id) }}
+                    {%- else -%}
+                        {{ url_for('auth.login') }}
+                    {%- endif -%}
+                " class="btn btn-sm btn-outline-accent rounded-pill mt-2" style="border-color: #f75407; color: #f75407; font-weight: 500; transition: all 0.2s;">
+                    Ver productos
+                </a>
             </div>
         </div>
+        {% endfor %}
     </div>
-</div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="py-4" style="background: linear-gradient(135deg, #f75407 0%, #ff7a2f 100%); border-radius: 16px; color: white; box-shadow: 0 8px 30px rgba(247,84,7,0.25);">
+    <div class="container text-center py-3">
+        <h2 class="display-6 fw-bold" style="color: white; text-shadow: 0 2px 8px rgba(0,0,0,0.1);">¿Tienes un emprendimiento?</h2>
+        <p class="lead mb-4" style="color: rgba(255,255,255,0.95); font-weight: 400;">Únete a nuestra comunidad y comienza a vender tus productos hoy mismo.</p>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-5 rounded-pill fw-bold" style="color: #f75407; background: white; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: all 0.2s;">
+            <i class="bi bi-rocket-takeoff me-2"></i> Comienza a vender hoy
+        </a>
+    </div>
+</section>
 
 <style>
-    /* ================================================================ */
-    /*  HOME PAGE CUSTOM STYLES                                        */
-    /* ================================================================ */
-
-    /* 1. Hero Section */
-    .hero-section {
-        min-height: 80vh;
-        background: linear-gradient(135deg, #f4f7fc 0%, #eef2f7 100%);
-        padding: 4rem 0;
-        position: relative;
-        overflow: hidden;
+    .transition-hover {
+        transition: all 0.25s ease;
     }
-    .hero-title .text-accent {
-        color: var(--naranja);
-        position: relative;
+    .transition-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.08) !important;
     }
-    .hero-title .text-accent::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 4px;
-        background: var(--naranja);
-        border-radius: 4px;
+    .transition-hover:hover .card-img-top {
+        transform: scale(1.02);
     }
-    .hero-placeholder {
-        background: linear-gradient(135deg, var(--azul), var(--azul-oscuro));
-        border-radius: 24px;
-        padding: 4rem 2rem;
-        text-align: center;
-        min-height: 300px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-    }
-
-    /* 2. Search Box - VERSIÓN MEJORADA */
-    .search-box-modern {
-        background: white;
-        border-radius: 50px;
-        padding: 8px;
-        box-shadow: 0 4px 30px rgba(0,0,0,0.04);
-        border: 1px solid #e2e8f0;
-        transition: box-shadow 0.3s, border-color 0.3s;
-        display: flex;
-        align-items: center;
-    }
-    .search-box-modern:focus-within {
-        box-shadow: 0 8px 40px rgba(0,0,0,0.08);
-        border-color: var(--naranja);
-    }
-    .search-icon-wrapper {
-        padding: 0 16px 0 20px;
-        flex-shrink: 0;
-    }
-    .search-icon {
-        color: #94a3b8;
-        font-size: 1.3rem;
-        transition: color 0.3s;
-    }
-    .search-box-modern:focus-within .search-icon {
-        color: var(--naranja);
-    }
-    .search-form {
-        display: flex;
-        flex: 1;
-        gap: 8px;
-        align-items: center;
-        min-width: 0;
-    }
-    .search-input-modern {
-        flex: 1;
-        border: none;
-        outline: none;
-        padding: 14px 0;
-        font-size: 1.05rem;
-        background: transparent;
-        min-width: 0;
-        color: var(--texto-oscuro);
-    }
-    .search-input-modern::placeholder {
-        color: #a0aec0;
-        font-weight: 400;
-    }
-    .search-btn-modern {
-        padding: 10px 32px;
-        border-radius: 40px;
-        font-weight: 500;
-        white-space: nowrap;
-        flex-shrink: 0;
-        font-size: 0.95rem;
-        transition: all 0.2s;
-        margin-right: 4px;
-    }
-    .search-btn-modern:hover {
+    .btn-accent:hover {
+        background: #e04a06 !important;
         transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(247,84,7,0.3);
+        box-shadow: 0 6px 20px rgba(247,84,7,0.35) !important;
     }
-
-    .search-tips .badge {
-        font-weight: 400;
-        padding: 4px 14px;
-        border-radius: 20px;
-        cursor: default;
+    .btn-outline-accent:hover {
+        background: #f75407 !important;
+        color: white !important;
+        transform: translateY(-2px);
+    }
+    .btn-outline-light:hover {
+        background: rgba(255,255,255,0.15) !important;
+        color: white !important;
+        transform: translateY(-2px);
+    }
+    .btn-light:hover {
+        background: #f8f9fa !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+    }
+    .hero-section .btn {
         transition: all 0.2s;
     }
-    .search-tips .badge:hover {
-        background: var(--naranja) !important;
-        color: white !important;
-        transform: translateY(-1px);
+    .hero-section .btn:hover {
+        transform: translateY(-2px);
     }
-
-    /* 3. Category Cards */
-    .category-card-modern {
-        display: block;
-        background: white;
-        padding: 20px 12px;
-        border-radius: 20px;
-        border: 1px solid #e2e8f0;
-        transition: all 0.3s;
-        text-decoration: none;
-        color: inherit;
+    .card .btn-accent {
+        transition: all 0.2s;
     }
-    .category-card-modern:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 12px 28px rgba(0,0,0,0.06);
-        border-color: var(--naranja);
+    .card .btn-accent:hover {
+        background: #e04a06 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(247,84,7,0.3) !important;
     }
-    .category-image {
-        width: 72px;
-        height: 72px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 8px;
-        transition: transform 0.3s;
-    }
-    .category-card-modern:hover .category-image {
-        transform: scale(1.08) rotate(-4deg);
-    }
-    .category-emoji {
-        font-size: 2.2rem;
-        line-height: 1;
-    }
-
-    /* 4. Product Cards */
-    .product-card {
-        background: white;
-        border-radius: 20px;
-        overflow: hidden;
-        border: 1px solid #e2e8f0;
-        transition: all 0.3s;
-    }
-    .product-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 12px 28px rgba(0,0,0,0.06);
-    }
-    .product-image-container {
-        position: relative;
-        height: 200px;
-        overflow: hidden;
-        background: #f1f5f9;
-    }
-    .product-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.4s;
-    }
-    .product-card:hover .product-image {
-        transform: scale(1.05);
-    }
-    .product-image-placeholder {
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f1f5f9;
-        color: #94a3b8;
-    }
-    .product-actions {
-        position: absolute;
-        bottom: 12px;
-        left: 12px;
-        right: 12px;
-        display: flex;
-        gap: 8px;
-        opacity: 0;
-        transform: translateY(10px);
-        transition: all 0.3s;
-    }
-    .product-card:hover .product-actions {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    .product-body {
-        padding: 16px;
-    }
-
-    /* 5. Entrepreneur Cards */
-    .entrepreneur-card {
-        background: white;
-        padding: 24px;
-        border-radius: 20px;
-        text-align: center;
-        border: 1px solid #e2e8f0;
-        transition: all 0.3s;
-    }
-    .entrepreneur-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 12px 28px rgba(0,0,0,0.06);
-        border-color: var(--naranja);
-    }
-    .entrepreneur-avatar {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background: #f1f5f9;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
-    }
-
-    /* 6. Benefit Cards */
-    .benefit-card {
-        padding: 32px 20px;
-        background: white;
-        border-radius: 20px;
-        border: 1px solid #e2e8f0;
-        transition: all 0.3s;
-    }
-    .benefit-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 12px 28px rgba(0,0,0,0.06);
-        border-color: var(--naranja);
-    }
-    .benefit-icon {
-        width: 72px;
-        height: 72px;
-        background: var(--azul);
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.8rem;
-        margin-bottom: 16px;
-        transition: transform 0.3s;
-    }
-    .benefit-card:hover .benefit-icon {
-        transform: scale(1.08) rotate(-4deg);
-    }
-
-    /* 7. Step Cards */
-    .step-card {
-        padding: 24px 16px;
-        background: white;
-        border-radius: 20px;
-        border: 1px solid #e2e8f0;
-        transition: all 0.3s;
-        position: relative;
-    }
-    .step-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 28px rgba(0,0,0,0.06);
-    }
-    .step-number {
-        position: absolute;
-        top: -12px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 32px;
-        height: 32px;
-        background: var(--naranja);
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 0.9rem;
-    }
-    .step-icon {
-        font-size: 2.2rem;
-        color: var(--azul);
-        margin-bottom: 12px;
-    }
-
-    /* 8. Testimonials */
-    .testimonial-card {
-        background: white;
-        padding: 24px;
-        border-radius: 20px;
-        border: 1px solid #e2e8f0;
-        transition: all 0.3s;
-    }
-    .testimonial-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 28px rgba(0,0,0,0.06);
-    }
-    .testimonial-rating {
-        color: #f59e0b;
-        font-size: 1.2rem;
-        letter-spacing: 2px;
-    }
-    .testimonial-avatar {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background: #f1f5f9;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    /* 9. CTA Section */
-    .cta-card {
-        background: linear-gradient(135deg, var(--azul) 0%, var(--azul-oscuro) 100%);
-        padding: 4rem 2rem;
-        border-radius: 32px;
-        position: relative;
-        overflow: hidden;
-    }
-    .cta-card::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -20%;
-        width: 400px;
-        height: 400px;
-        background: rgba(247, 84, 7, 0.1);
-        border-radius: 50%;
-    }
-
-    /* 10. Back to top button */
-    .back-to-top {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        width: 48px;
-        height: 48px;
-        background: var(--azul);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        font-size: 1.4rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-        cursor: pointer;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s;
-        z-index: 1000;
-    }
-    .back-to-top.show {
-        opacity: 1;
-        visibility: visible;
-    }
-    .back-to-top:hover {
-        background: var(--azul-oscuro);
-        transform: translateY(-4px);
-    }
-
-    /* 11. Auth Modal */
-    .auth-modal {
-        border-radius: 28px;
-        border: none;
-        background: white;
-        padding: 8px;
-    }
-    .auth-modal .modal-content {
-        border: none;
-        border-radius: 28px;
-        background: transparent;
-    }
-
-    /* 12. Animations on scroll */
-    .animate-on-scroll {
-        opacity: 0;
-        transform: translateY(30px);
-        transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .animate-on-scroll.visible {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    /* 13. Responsive */
-    @media (max-width: 992px) {
-        .hero-section {
-            min-height: auto;
-            padding: 3rem 0;
-        }
-        .hero-title {
-            font-size: 2.8rem;
-        }
-        .hero-placeholder {
-            min-height: 200px;
-            padding: 2rem;
-        }
-        .search-box-modern {
-            border-radius: 30px;
-        }
-        .search-form {
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-        .search-input-modern {
-            width: 100%;
-            padding: 12px 16px;
-        }
-        .search-btn-modern {
-            width: 100%;
-            justify-content: center;
-            margin: 0 4px 4px 4px;
-        }
-        .search-icon-wrapper {
-            display: none;
-        }
-    }
-    @media (max-width: 576px) {
-        .hero-title {
-            font-size: 2rem;
-        }
-        .search-box-modern {
-            border-radius: 24px;
-            padding: 6px;
-        }
-        .search-input-modern {
-            font-size: 0.95rem;
-            padding: 10px 14px;
-        }
-        .search-btn-modern {
-            font-size: 0.9rem;
-            padding: 8px 20px;
-        }
-        .category-card-modern {
-            padding: 12px 8px;
-        }
-        .category-image {
-            width: 56px;
-            height: 56px;
-        }
-        .category-emoji {
-            font-size: 1.6rem;
-        }
+    .text-primary {
+        color: #f75407 !important;
     }
 </style>
-
-<script>
-    // ================================================================
-    // 1. ANIMACIONES AL HACER SCROLL
-    // ================================================================
-    document.addEventListener('DOMContentLoaded', function() {
-        const animatedElements = document.querySelectorAll('.animate-on-scroll');
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const delay = parseFloat(entry.target.style.transitionDelay) || 0;
-                    setTimeout(() => {
-                        entry.target.classList.add('visible');
-                    }, delay * 1000);
-                }
-            });
-        }, {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        });
-
-        animatedElements.forEach(el => observer.observe(el));
-    });
-
-    // ================================================================
-    // 2. BOTÓN VOLVER ARRIBA
-    // ================================================================
-    const backToTop = document.getElementById('back-to-top');
-
-    window.addEventListener('scroll', function() {
-        if (window.scrollY > 300) {
-            backToTop.classList.add('show');
-        } else {
-            backToTop.classList.remove('show');
-        }
-    });
-
-    backToTop.addEventListener('click', function() {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    // ================================================================
-    // 3. MODAL DE AUTENTICACIÓN
-    // ================================================================
-    function showAuthModal(message) {
-        const modal = new bootstrap.Modal(document.getElementById('authModal'));
-        const modalBody = document.querySelector('#authModal .modal-body p');
-        if (modalBody) {
-            modalBody.innerHTML = `
-                <i class="bi bi-shield-lock fs-3 d-block mb-2"></i>
-                ${message || 'Para continuar con esta acción, debes iniciar sesión o crear una cuenta.'}
-            `;
-        }
-        modal.show();
-    }
-
-    // ================================================================
-    // 4. AGREGAR AL CARRITO
-    // ================================================================
-    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            {% if not current_user.is_authenticated %}
-                showAuthModal('Para agregar productos al carrito, debes iniciar sesión.');
-            {% else %}
-                const productId = this.dataset.productId;
-                const productName = this.dataset.productName;
-                const formData = new FormData();
-                formData.append('quantity', 1);
-
-                fetch(`/cliente/agregar-carrito-ajax/${productId}`, {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const cartCount = document.getElementById('cart-count');
-                        if (cartCount) cartCount.innerText = data.total_items;
-                        showToast('success', `"${productName}" agregado al carrito`);
-                    } else {
-                        showToast('danger', data.message || 'Error al agregar el producto');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showToast('danger', 'Error de conexión');
-                });
-            {% endif %}
-        });
-    });
-
-    // ================================================================
-    // 5. TOAST NOTIFICATIONS
-    // ================================================================
-    function showToast(type, message) {
-        const toastContainer = document.querySelector('.toast-container') || (() => {
-            const container = document.createElement('div');
-            container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-            container.style.zIndex = '1050';
-            document.body.appendChild(container);
-            return container;
-        })();
-
-        const toast = document.createElement('div');
-        toast.className = `toast align-items-center text-white border-0 rounded-4 shadow-lg`;
-        toast.style.backgroundColor = type === 'success' ? '#122474' : '#dc3545';
-        toast.role = 'alert';
-        toast.ariaLive = 'assertive';
-        toast.ariaAtomic = 'true';
-
-        toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        `;
-
-        toastContainer.appendChild(toast);
-        const bsToast = new bootstrap.Toast(toast, { delay: 3000, autohide: true });
-        bsToast.show();
-
-        toast.addEventListener('hidden.bs.toast', () => {
-            toast.remove();
-        });
-    }
-</script>
-
-<!-- Toast container para notificaciones -->
-<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1050;"></div>
 
 {% endblock %}
