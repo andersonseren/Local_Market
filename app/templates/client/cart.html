@@ -3,13 +3,14 @@
 <h1>Carrito de compras</h1>
 {% if cart %}
 <div class="table-responsive">
-    <table class="table table-bordered">
+    <table class="table table-bordered align-middle">
         <thead class="table-dark">
             <tr>
                 <th>Producto</th>
                 <th>Precio unit.</th>
                 <th>Cantidad</th>
                 <th>Subtotal</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -17,14 +18,34 @@
             <tr>
                 <td>{{ item.name }}</td>
                 <td>{{ item.price|currency }}</td>
-                <td>{{ item.quantity }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('client.update_cart_item', product_id=product_id) }}" class="d-flex align-items-center gap-2">
+                        <input type="number" 
+                               name="quantity" 
+                               value="{{ item.quantity }}" 
+                               min="0" 
+                               max="99" 
+                               class="form-control" 
+                               style="width: 70px;">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="bi bi-arrow-repeat"></i> Actualizar
+                        </button>
+                    </form>
+                </td>
                 <td>{{ (item.price * item.quantity)|currency }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('client.remove_from_cart', product_id=product_id) }}">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este producto del carrito?')">
+                            <i class="bi bi-trash3"></i> Eliminar
+                        </button>
+                    </form>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
         <tfoot>
             <tr class="table-active">
-                <th colspan="3" class="text-end">Total:</th>
+                <th colspan="4" class="text-end">Total:</th>
                 <th>{{ total|currency }}</th>
             </tr>
         </tfoot>
