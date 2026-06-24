@@ -83,6 +83,51 @@ def view_cart():
     total = sum(item['price'] * item['quantity'] for item in cart.values())
     return render_template('client/cart.html', cart=cart, total=total)
 
+# ==================== NUEVAS RUTAS PARA GESTIÓN DEL CARRITO ====================
+
+@client_bp.route('/actualizar-carrito/<int:product_id>', methods=['POST'])
+@login_required
+@role_required('cliente')
+def update_cart_item(product_id):
+    """Actualiza la cantidad de un producto en el carrito."""
+    cart = get_cart()
+    product_key = str(product_id)
+    
+    if product_key not in cart:
+        flash('Producto no encontrado en el carrito.', 'danger')
+        return redirect(url_for('client.view_cart'))
+    
+    quantity = int(request.form.get('quantity', 1))
+    if quantity <= 0:
+        # Si la cantidad es 0 o negativa, eliminar el producto
+        del cart[product_key]
+        flash('Producto eliminado del carrito.', 'info')
+    else:
+        cart[product_key]['quantity'] = quantity
+        flash('Cantidad actualizada.', 'success')
+    
+    save_cart(cart)
+    return redirect(url_for('client.view_cart'))
+
+@client_bp.route('/eliminar-del-carrito/<int:product_id>', methods=['POST'])
+@login_required
+@role_required('cliente')
+def remove_from_cart(product_id):
+    """Elimina un producto completamente del carrito."""
+    cart = get_cart()
+    product_key = str(product_id)
+    
+    if product_key in cart:
+        del cart[product_key]
+        save_cart(cart)
+        flash('Producto eliminado del carrito.', 'info')
+    else:
+        flash('Producto no encontrado en el carrito.', 'danger')
+    
+    return redirect(url_for('client.view_cart'))
+
+# ==================== FIN NUEVAS RUTAS ====================
+
 @client_bp.route('/checkout', methods=['GET', 'POST'])
 @login_required
 @role_required('cliente')
